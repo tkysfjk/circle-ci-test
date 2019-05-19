@@ -28,10 +28,10 @@ jobs:
           name: Run build script
           command: "./build.sh -t build -c << parameters.config >> | tee artifacts/build.log"
 
-      - persist_to_workspace:
-          root: artifacts
-          paths:
-            - ./*
+      # - persist_to_workspace:
+      #     root: artifacts
+      #     paths:
+      #       - ./*
 
   test:
     docker:
@@ -40,14 +40,14 @@ jobs:
     parameters: *COMMON_PARAMS
 
     steps:
-      - attach_workspace:
-          at: artifacts
+      # - attach_workspace:
+      #     at: artifacts
 
       - checkout
 
-      - run:
-          name: Check Artifact
-          command: cat artifacts/build.log
+      # - run:
+      #     name: Check Artifact
+      #     command: cat artifacts/build.log
 
       - run:
           name: Run tests
@@ -65,6 +65,7 @@ jobs:
       - run:
           name: Upload
           command: ./build.sh -t upload -c << parameters.config >>
+
 
 workflows:
   pr:
