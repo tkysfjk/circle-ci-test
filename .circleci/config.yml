@@ -13,61 +13,63 @@ jobs:
       - checkout
 
       - run:
-        name: Greeting
-        command: echo Hello, world.
+          name: Greeting
+          command: echo Hello, world.
 
       - run:
-        name: Print the Current Time
-        command: date
+          name: Print the Current Time
+          command: date
 
       - run:
-        name: Run build script
-        command: "./build.sh -t build -c << parameters.config >>"
+          name: Run build script
+          command: "./build.sh -t build -c << parameters.config >>"
 
   test:
-      docker:
-        - image: debian:stretch
+    docker:
+      - image: debian:stretch
 
-      parameters: *COMMON_PARAMS
-      
+    parameters: *COMMON_PARAMS
+
+    steps:
       - run:
-        name: Run tests
-        command: ./build.sh -t test -c << parameters.config >>
+          name: Run tests
+          command: ./build.sh -t test -c << parameters.config >>
 
   upload:
-      docker:
-        - image: debian:stretch
+    docker:
+      - image: debian:stretch
 
-      parameters: *COMMON_PARAMS
-      
+    parameters: *COMMON_PARAMS
+
+    steps:
       - run:
-        name: Upload
-        command: ./build.sh -t upload -c << parameters.config >>
+          name: Upload
+          command: ./build.sh -t upload -c << parameters.config >>
 
 workflows:
   pr:
     jobs:
       - build:
-        name: DebugBuild
-        config: debug
+          name: DebugBuild
+          config: debug
       - test:
-        name: DebugTest
-        config: debug
-        requires:
-          - DebugBuild
-        filters: &COMMON_PR_FILTERS
-          branches:
-            only: /feature\/.*/
+          name: DebugTest
+          config: debug
+          requires:
+            - DebugBuild
+          filters: &COMMON_PR_FILTERS
+            branches:
+              only: /feature\/.*/
 
       - build:
-        name: ReleaseBuild
-        config: release
+          name: ReleaseBuild
+          config: release
       - test:
-        name: ReleaseTest
-        config: release
-        requires:
-          - ReleaseBuild
-          
+          name: ReleaseTest
+          config: release
+          requires:
+            - ReleaseBuild
+ 
   commit:
     jobs:
       - build:
