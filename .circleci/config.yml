@@ -28,11 +28,6 @@ jobs:
           name: Run build script
           command: "./build.sh -t build -c << parameters.config >> | tee artifacts/build.log"
 
-      # - persist_to_workspace:
-      #     root: artifacts
-      #     paths:
-      #       - ./*
-
   test:
     docker:
       - image: debian:stretch
@@ -40,14 +35,7 @@ jobs:
     parameters: *COMMON_PARAMS
 
     steps:
-      # - attach_workspace:
-      #     at: artifacts
-
       - checkout
-
-      # - run:
-      #     name: Check Artifact
-      #     command: cat artifacts/build.log
 
       - run:
           name: Run tests
@@ -73,18 +61,20 @@ workflows:
       - build:
           name: PrDebugBuild
           config: debug
+          filters: &COMMON_PR_FILTERS
+            branches:
+              only: /feature\/.*/
       - test:
           name: PrDebugTest
           config: debug
           requires:
             - PrDebugBuild
-          filters: &COMMON_PR_FILTERS
-            branches:
-              only: /feature\/.*/
+          filters: *COMMON_PR_FILTERS
 
       - build:
           name: PrReleaseBuild
           config: release
+          filters: *COMMON_PR_FILTERS
       - test:
           name: PrReleaseTest
           config: release
