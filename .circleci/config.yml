@@ -71,36 +71,37 @@ workflows:
   pr:
     jobs:
       - build:
-          name: DebugBuild
+          name: PrDebugBuild
           config: debug
       - test:
-          name: DebugTest
+          name: PrDebugTest
           config: debug
           requires:
-            - DebugBuild
+            - PrDebugBuild
           filters: &COMMON_PR_FILTERS
             branches:
               only: /feature\/.*/
 
       - build:
-          name: ReleaseBuild
+          name: PrReleaseBuild
           config: release
       - test:
-          name: ReleaseTest
+          name: PrReleaseTest
           config: release
           requires:
-            - ReleaseBuild
+            - PrReleaseBuild
           filters: *COMMON_PR_FILTERS
 
   commit:
     jobs:
       - build:
-          name: ReleaseBuild
+          name: CommitReleaseBuild
           config: release
+          filters: &COMMON_COMMIT_FILTERS
+            branches:
+              only: master
       - upload:
           config: release
           requires:
-            - ReleaseBuild
-          filters:
-            branches:
-              only: master
+            - CommitReleaseBuild
+          filters: *COMMON_COMMIT_FILTERS
