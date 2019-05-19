@@ -13,6 +13,10 @@ jobs:
       - checkout
 
       - run:
+          name: Make artifact dir
+          command: mkdir -p artifacts
+
+      - run:
           name: Greeting
           command: echo Hello, world.
 
@@ -22,7 +26,12 @@ jobs:
 
       - run:
           name: Run build script
-          command: "./build.sh -t build -c << parameters.config >>"
+          command: "./build.sh -t build -c << parameters.config >> | tee artifacts/build.log"
+
+      - persist_to_workspace:
+          root: artifacts
+          paths:
+            - ./*
 
   test:
     docker:
@@ -31,6 +40,15 @@ jobs:
     parameters: *COMMON_PARAMS
 
     steps:
+      - attach_workspace:
+          at: artifacts
+
+      - checkout
+
+      - run:
+          name: Check Artifact
+          command: cat artifacts/build.log
+
       - run:
           name: Run tests
           command: ./build.sh -t test -c << parameters.config >>
@@ -42,6 +60,8 @@ jobs:
     parameters: *COMMON_PARAMS
 
     steps:
+      - checkout
+
       - run:
           name: Upload
           command: ./build.sh -t upload -c << parameters.config >>
@@ -69,7 +89,8 @@ workflows:
           config: release
           requires:
             - ReleaseBuild
- 
+          filters: *COMMON_PR_FILTERS
+
   commit:
     jobs:
       - build:
